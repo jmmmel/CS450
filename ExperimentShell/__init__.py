@@ -1,3 +1,7 @@
+import random as rand
+import numpy
+from sklearn import datasets
+
 class HardCoded:
     def train(self, valuesArray):
         return valuesArray
@@ -7,27 +11,28 @@ class HardCoded:
         for index in range(total):
             a.append(0)
         return a
+#found at http://stackoverflow.com/questions/4601373/better-way-to-shuffle-two-numpy-arrays-in-unison
+def shuffle_in_unison(a, b):
+    rng_state = numpy.random.get_state()
+    numpy.random.shuffle(a)
+    numpy.random.set_state(rng_state)
+    numpy.random.shuffle(b)
 
-import random as rand
-from sklearn import datasets
 iris = datasets.load_iris()
 rand.seed()
 
-for i in range(len(iris)):
-    swap = iris[i]
-    swapIndex = rand.randint(0,len(iris)-1)
-    iris[i] = iris[swapIndex]
-    iris[swapIndex] = swap
+shuffle_in_unison(iris.target, iris.data)
 
-trainArray = iris[:105]
-predictArray = iris[105:]
+trainArray = iris.data[:105], iris.target[:105]
+predictArray = iris.target[105:]
 
-HardCoded.train(trainArray)
-predictedValues = HardCoded.predict(predictArray)
+blackBox = HardCoded()
+blackBox.train(trainArray)
+predictedValues = blackBox.predict(predictArray)
 
 count = 0
 for index in range(len(predictArray)):
     if predictArray[index] == predictedValues[index]:
         count = count+1
 
-print("The percent correct is:" + (count / len(predictArray)))
+print("The percent correct is: " + str(count / len(predictArray)))
