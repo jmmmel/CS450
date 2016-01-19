@@ -18,14 +18,16 @@ def shuffle_in_unison(a, b):
     numpy.random.set_state(rng_state)
     numpy.random.shuffle(b)
 
+#gets iris dataset and shuffles it
 iris = datasets.load_iris()
 rand.seed()
-
 shuffle_in_unison(iris.target, iris.data)
 
+#Stores parts of iris dataset into comparable arrays
 trainArray = iris.data[:105], iris.target[:105]
 predictArray = iris.target[105:]
 
+#Sends data to the training then sends predicted object
 blackBox = HardCoded()
 blackBox.train(trainArray)
 predictedValues = blackBox.predict(predictArray)
