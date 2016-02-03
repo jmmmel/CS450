@@ -1,44 +1,22 @@
-import csv
-import numpy as np
-
-def getCarCsv():
-    dataArray = []
-    with open('car.csv') as csvFile:
-      reader = csv.reader(csvFile)
-      for row in reader:
-          if row[0] == 'vhigh':
-              row[0] = 3
-          if row[0] == 'high':
-              row[0] = 2
-          if row[0] == 'med':
-              row[0] = 1
-          if row[0] == 'low':
-              row[0] = 0
-          if row[1] == 'vhigh':
-              row[1] = 3
-          if row[1] == 'high':
-              row[1] = 2
-          if row[1] == 'med':
-              row[1] = 1
-          if row[1] == 'low':
-              row[1] = 0
-          if row[2] == '5more':
-              row[2] = 5
-          if row[3] == 'more':
-              row[3] = 6
-          dataArray.append(row)
-    return dataArray
-
-class KNNeighbors:
-    internalLearningSet = []
-    def learn(self, learningData):
-        standardized = np.asarray(learningData)
-    def predict(self, predictData):
-        return predictData
-
 import random as rand
 import numpy
+import math
+import random as rand
 from sklearn import datasets
+
+class KNNeighbors:
+    internalLearningSet = numpy.array
+    def learn(self, learningData):
+        self.internalLearningSet  = learningData
+    def predict(self, predictData, nearestK):
+        distanceArray = [];
+        for row in range(0, len(self.internalLearningSet[:,0])):
+            distance = 0;
+            for index in range(0, len(predictData)-1):
+                distance += (predictData[index]-self.internalLearningSet[row,index])**2
+            distance = math.sqrt(distance)
+            distanceArray.append(distance)
+        return self.internalLearningSet[distanceArray.index(min(distanceArray)),len(self.internalLearningSet[0])-1]
 
 #found at http://stackoverflow.com/questions/4601373/better-way-to-shuffle-two-numpy-arrays-in-unison
 def shuffle_in_unison(a, b):
@@ -48,22 +26,24 @@ def shuffle_in_unison(a, b):
     numpy.random.shuffle(b)
 
 
-car = getCarCsv()
+
+#gets iris dataset and shuffles it
+iris = datasets.load_iris()
 rand.seed()
-numpy.random.shuffle(car)
+shuffle_in_unison(iris.target, iris.data)
 
-#Stores parts of iris dataset into comparable arrays
-trainArray = car.data[:105], car.target[:105]
-predictArray = car.target[105:]
-
+iris.data = iris.data / iris.data.max(axis=0)
+testData = numpy.hstack((iris.data,numpy.atleast_2d(iris.target).T))
 #Sends data to the training then sends predicted object
 blackBox = KNNeighbors()
-blackBox.learn(trainArray)
-predictedValues = blackBox.predict(predictArray)
+blackBox.learn(testData[:30])
+findData = testData[30:]
+total = 0
+correct = 0
+for index in range(0, len(findData[:,0])):
+    predicted = blackBox.predict(findData[index],1)
+    total += 1
+    if predicted == findData[index, len(findData[index])-1]:
+        correct += 1
 
-count = 0
-for index in range(len(predictArray)):
-    if predictArray[index] == predictedValues[index]:
-        count = count+1
-
-print("The percent correct is: " + str(count / len(predictArray)))
+print ("Accuracy: ", (correct/total) )
