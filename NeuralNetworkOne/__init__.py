@@ -9,16 +9,18 @@ class neurode:
         self.weights = []
         for value in range(1, rowCount + 1):
             self.weights.append(rand.uniform(-1,1))
+
     def printWeight(self):
         for value in range(0, len(self.weights)):
             print("Weight " + str(value) + ": " + str(self.weights[value])  )
 
     def checkInputs(self, inputs):
-        print ("Input received:")
-        for input in inputs:
-            print(input)
-        print ("\n")
-        return 1
+        total = 0
+        for index in range(0, len(inputs)-1):
+            total += (self.weights[index] * inputs[index])
+        if total >= 0:
+            return 1
+        return 0
 
 class network:
     def __init__(self, numberOfNodes, columnCount):
@@ -51,10 +53,10 @@ def shuffle_in_unison(a, b):
 iris = datasets.load_iris()
 rand.seed()
 shuffle_in_unison(iris.target, iris.data)
-iris.data = iris.data / iris.data.min(axis=0)
+iris.data = iris.data / iris.data.max(axis=0)
 testData = numpy.hstack((iris.data,numpy.atleast_2d(iris.target).T))
 
-newNeurode = network(10, 5)
+newNeurode = network(10, len(testData[0]))
 x = 1;
 for flower in iris.data:
     outputs = newNeurode.checkInputs(flower)
@@ -69,10 +71,10 @@ iFile = open('pimaIndians.data', 'r')
 reader = csv.reader(iFile)
 for row in reader:
     diabetesData.append(list(row))
+
 numpyData = numpy.asarray(diabetesData)
 numpyData = numpyData.astype(float)
 numpyData = numpyData / (numpyData.max(axis=0) + numpy.spacing(0))
-
 numpy.random.shuffle(numpyData)
 
 pimaNetwork = network(5,len(numpyData[0]))
